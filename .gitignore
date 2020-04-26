@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/CGdrawing/v16
+/CGdrawing/bin/Debug
+/CGdrawing/obj/Debug

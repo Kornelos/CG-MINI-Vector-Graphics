@@ -324,11 +324,11 @@ namespace CGdrawing
         {
             double value = 1 - Math.Pow((dist * 2 / 3), 2);
 
-            Color old = bmp.GetPixelFast(x, y);
+            Color old = bmp.GetPixelUnsafe(x, y);
 
             Color col = ColorInterpolator.InterpolateBetween(old, drawingColor, value);
 
-            bmp.SetPixelFast(x, y, col);
+            bmp.SetPixelUnsafe(x, y, col);
         }
 
         public override string ToString()

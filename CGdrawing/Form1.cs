@@ -56,7 +56,7 @@ namespace CGdrawing
                         if (point.X >= mainPictureBox.Width || point.Y >= mainPictureBox.Height || point.X <= 0 || point.Y <= 0)
                             continue;
 
-                        bmp.SetPixelFast(point.X, point.Y, d.drawingColor);
+                        bmp.SetPixelUnsafe(point.X, point.Y, d.drawingColor);
                     }
                 }
 
