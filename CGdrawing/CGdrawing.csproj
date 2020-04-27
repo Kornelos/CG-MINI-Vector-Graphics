@@ -37,6 +37,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -49,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BitmapExtension.cs" />
+    <Compile Include="Drawings\Capsule.cs" />
     <Compile Include="Drawings\Circle.cs" />
     <Compile Include="Drawings\Drawing.cs" />
     <Compile Include="Drawings\DrawingTypes.cs" />

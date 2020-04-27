@@ -10,6 +10,7 @@ namespace CGdrawing
     {
         Line,
         Circle,
-        Polygon
+        Polygon,
+        Capsule
     }
 }

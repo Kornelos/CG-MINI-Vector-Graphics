@@ -17,7 +17,11 @@ namespace CGdrawing
             this.center = center;
             radius = (int) pointOnCircle.getAbsoluteDistance(center);
         }
-
+        public Circle(Point center, int rad,Color color) : base(color)
+        {
+            this.center = center;
+            radius = rad;
+        }
         public override Point GetClosestVertex(Point point)
         {
             // calculate closest point on circle

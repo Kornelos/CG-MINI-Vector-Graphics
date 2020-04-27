@@ -120,12 +120,28 @@ namespace CGdrawing
                         clickedPoints.Clear();
                         //draw shape
                         Redraw();
+                        clickedPoints.Clear();
                     }
                     else
                     {
                         clickedPoints.Add(e.Location);
                     }
                     break;
+                case DrawingTypes.Capsule:
+                    if (clickedPoints.Count == 2)
+                    {
+                        clickedPoints.Add(e.Location);
+                        drawings.Add(new Capsule(currentColor, clickedPoints[0], clickedPoints[1], clickedPoints[2]));
+                        Redraw();
+                        clickedPoints.Clear();
+
+                    }
+                    else
+                    {
+                        clickedPoints.Add(e.Location);
+                    }
+                    break;
+               
             }
         }
 
@@ -133,6 +149,7 @@ namespace CGdrawing
         {
             polygonToolStripMenuItem.Checked = false;
             circleToolStripMenuItem.Checked = false;
+            capsuleToolStripMenuItem.Checked = false;
             currentDrawing = DrawingTypes.Line;
         }
 
@@ -140,6 +157,7 @@ namespace CGdrawing
         {
             polygonToolStripMenuItem.Checked = false;
             lineToolStripMenuItem.Checked = false;
+            capsuleToolStripMenuItem.Checked = false;
             currentDrawing = DrawingTypes.Circle;
         }
 
@@ -147,7 +165,16 @@ namespace CGdrawing
         {
             circleToolStripMenuItem.Checked = false;
             lineToolStripMenuItem.Checked = false;
+            capsuleToolStripMenuItem.Checked = false;
             currentDrawing = DrawingTypes.Polygon;
+        }
+        private void capsuleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            
+            circleToolStripMenuItem.Checked = false;
+            lineToolStripMenuItem.Checked = false;
+            polygonToolStripMenuItem.Checked = false;
+            currentDrawing = DrawingTypes.Capsule;
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -285,5 +312,7 @@ namespace CGdrawing
                 Redraw();
             }
         }
+
+     
     }
 }
