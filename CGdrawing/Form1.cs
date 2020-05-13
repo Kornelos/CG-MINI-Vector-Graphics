@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -16,13 +17,16 @@ namespace CGdrawing
     {
         BindingList<Drawing> drawings = new BindingList<Drawing>();
         List<Point> clickedPoints = new List<Point>();
-        DrawingTypes currentDrawing = DrawingTypes.Line;
+        DrawingTypes currentDrawing = DrawingTypes.Polygon;
         Color currentColor = Color.Black;
         int currentThickness = 1;
 
         // moving related variables
         Drawing drawingForMove;
         Point vertexForMove;
+
+        //cliping mode
+        bool clipingMode = false;
        
 
         public Form1()
@@ -41,7 +45,7 @@ namespace CGdrawing
             g.Clear(Color.White);
             return bmp;
         }
-        private void Redraw()
+        private Bitmap Redraw()
         {
             Bitmap bmp = InitBmp();
             foreach (var d in drawings)
@@ -62,6 +66,7 @@ namespace CGdrawing
 
             }
             mainPictureBox.Image = bmp;
+            return bmp;
         }
 
         private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -74,6 +79,22 @@ namespace CGdrawing
             // dont draw if its move mode
             if (dragCheckBox.Checked)
                 return;
+
+            if (clipingMode)
+            {
+                clickedPoints.Add(e.Location);
+                if (clickedPoints.Count == 2)
+                {
+                    Polygon p = (Polygon)shapeListBox.SelectedItem;
+                    p.clip(new Rectangle(clickedPoints[0].X, clickedPoints[0].Y, clickedPoints[1].X - clickedPoints[0].X, clickedPoints[1].Y - clickedPoints[0].Y));
+                    drawings.Add(new RectangleDrawing(currentColor, clickedPoints[0], clickedPoints[1], currentThickness));
+                    Redraw();
+                    clipingMode = false;
+                    clickedPoints.Clear();
+                }
+                else return;
+                
+            }
 
             switch (currentDrawing)
             {
@@ -125,6 +146,20 @@ namespace CGdrawing
                     else
                     {
                         clickedPoints.Add(e.Location);
+                       
+                        // temporary lines
+                        List<Line> lines = new List<Line>();
+                        for (int i = 0; i < clickedPoints.Count - 1;i++ )
+                        {
+                            Line l = new Line(clickedPoints[i], clickedPoints[i + 1], currentColor, currentThickness);
+                            lines.Add(l);
+                            drawings.Add(l);
+                        }
+                        Redraw();
+                        foreach (Line l in lines)
+                            drawings.Remove(l);
+
+
                     }
                     break;
                 case DrawingTypes.Capsule:
@@ -141,40 +176,65 @@ namespace CGdrawing
                         clickedPoints.Add(e.Location);
                     }
                     break;
-               
+                case DrawingTypes.Rectangle:
+                    if(clickedPoints.Count == 1)
+                    {
+                        clickedPoints.Add(e.Location);
+                        drawings.Add(new RectangleDrawing(currentColor, clickedPoints[0], clickedPoints[1], currentThickness));
+                        Redraw();
+                        clickedPoints.Clear();
+                    }
+                    else
+                    {
+                        clickedPoints.Add(e.Location);
+                    }
+                    break;
+
             }
         }
 
         private void lineToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            polygonToolStripMenuItem.Checked = false;
-            circleToolStripMenuItem.Checked = false;
-            capsuleToolStripMenuItem.Checked = false;
+            foreach(ToolStripMenuItem item in shapesToolStripMenuItem.DropDownItems)
+                item.Checked = false;
+
+            lineToolStripMenuItem.Checked = true;
             currentDrawing = DrawingTypes.Line;
         }
 
         private void circleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            polygonToolStripMenuItem.Checked = false;
-            lineToolStripMenuItem.Checked = false;
-            capsuleToolStripMenuItem.Checked = false;
+            foreach (ToolStripMenuItem item in shapesToolStripMenuItem.DropDownItems)
+                item.Checked = false;
+
+            circleToolStripMenuItem.Checked = true;
             currentDrawing = DrawingTypes.Circle;
         }
 
         private void polygonToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            circleToolStripMenuItem.Checked = false;
-            lineToolStripMenuItem.Checked = false;
-            capsuleToolStripMenuItem.Checked = false;
+            foreach (ToolStripMenuItem item in shapesToolStripMenuItem.DropDownItems)
+                item.Checked = false;
+
+            polygonToolStripMenuItem.Checked = true;
             currentDrawing = DrawingTypes.Polygon;
         }
         private void capsuleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
-            circleToolStripMenuItem.Checked = false;
-            lineToolStripMenuItem.Checked = false;
-            polygonToolStripMenuItem.Checked = false;
+            foreach (ToolStripMenuItem item in shapesToolStripMenuItem.DropDownItems)
+                item.Checked = false;
+
+            capsuleToolStripMenuItem.Checked = true;
             currentDrawing = DrawingTypes.Capsule;
+        }
+
+        private void rectangleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (ToolStripMenuItem item in shapesToolStripMenuItem.DropDownItems)
+                item.Checked = false;
+
+            rectangleToolStripMenuItem.Checked = true;
+            currentDrawing = DrawingTypes.Rectangle;
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -195,6 +255,7 @@ namespace CGdrawing
         {
             drawings.Clear();
             Redraw();
+            clickedPoints.Clear();
         }
 
         private void removeSelectedButton_Click(object sender, EventArgs e)
@@ -281,6 +342,8 @@ namespace CGdrawing
             }
         }
 
+
+        // Edit of the existing shapes
         private void mainPictureBox_MouseDown(object sender, MouseEventArgs e)
         {
             if (dragCheckBox.Checked && drawings.Count != 0)
@@ -313,6 +376,43 @@ namespace CGdrawing
             }
         }
 
-     
+        private void fillButton_Click(object sender, EventArgs e)
+        {
+            if(shapeListBox.SelectedItem.GetType() == typeof(Polygon))
+            {
+                Polygon p = (Polygon)shapeListBox.SelectedItem;
+                p.filled = true;
+                Redraw();
+            }
+        }
+
+        private void clipButton_Click(object sender, EventArgs e)
+        {
+            clickedPoints.Clear();
+            clipingMode = true;
+        }
+
+        private void shapeListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            
+            // disabling if not polygon
+            if(shapeListBox.SelectedItem == null)
+            {
+                fillButton.Enabled = false;
+                clipButton.Enabled = false;
+                return;
+            }
+            if (shapeListBox.SelectedItem.GetType() == typeof(Polygon))
+            {
+                fillButton.Enabled = true;
+                clipButton.Enabled = true;
+            }
+            else
+            {
+                fillButton.Enabled = false;
+                clipButton.Enabled = false;
+            }
+            
+        }
     }
 }

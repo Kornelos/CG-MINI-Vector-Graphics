@@ -57,6 +57,8 @@
     <Compile Include="Drawings\Interpolator.cs" />
     <Compile Include="Drawings\Line.cs" />
     <Compile Include="Drawings\Polygon.cs" />
+    <Compile Include="Drawings\Rectangle.cs" />
+    <Compile Include="Filling\Edge.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

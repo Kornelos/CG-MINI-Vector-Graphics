@@ -11,6 +11,7 @@ namespace CGdrawing
         Line,
         Circle,
         Polygon,
-        Capsule
+        Capsule,
+        Rectangle
     }
 }
